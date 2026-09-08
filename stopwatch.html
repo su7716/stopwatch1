@@ -6,67 +6,60 @@
 <title>스톱워치 &amp; 타이머</title>
 <style>
   :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f1f5f9;
-    --muted: #94a3b8;
-    --accent: #38bdf8;
-    --green: #22c55e;
-    --red: #ef4444;
-    --amber: #f59e0b;
-    --border: #334155;
-    --input-bg: #0f172a;
-    --shadow: rgba(0,0,0,0.4);
-    --tab-bg: #0f172a;
-    --toggle-grad-1: #263449;
-    --toggle-grad-2: #0a0f1a;
-    --toggle-shadow-dark: rgba(0,0,0,0.65);
-    --toggle-shadow-light: rgba(255,255,255,0.06);
+    /* 2026 팬톤 올해의 컬러 팔레트: Cloud Dancer(11-4201) + Glamour & Gleam / Comfort Zone 보조 팔레트 */
+    --bg: #1c1b19;
+    --card: #26241f;
+    --text: #f0eee9;
+    --muted: #a9a29a;
+    --accent: #4fb3ac;
+    --green: #93ac7c;
+    --red: #d9645c;
+    --amber: #e0a25c;
+    --border: #3a362f;
+    --input-bg: #171614;
+    --shadow: rgba(0,0,0,0.55);
+    --tab-bg: #201e1a;
+    --toggle-grad-1: #2e2b25;
+    --toggle-grad-2: #14130f;
+    --toggle-shadow-dark: rgba(0,0,0,0.6);
+    --toggle-shadow-light: rgba(255,255,255,0.05);
     --icon-shadow: rgba(0,0,0,0.5);
-    --card-grad-1: #24334a;
-    --card-grad-2: #161f30;
-    --card-highlight: rgba(255,255,255,0.04);
-    --green-edge: #15803d;
-    --red-edge: #b91c1c;
-    --accent-edge: #0369a1;
-    --gray: #475569;
-    --gray-edge: #2c384c;
-    --dial-bg: #0c1424;
-    --dial-ink: #e7ecf3;
-    --hand-color: #6fa8ff;
-    --case-color: #33415a;
+    --card-grad-1: #2c2a24;
+    --card-grad-2: #1a1815;
+    --card-highlight: rgba(255,255,255,0.035);
+    --green-edge: #5e7a4b;
+    --red-edge: #a5372f;
+    --accent-edge: #2a7570;
+    --gray: #6e6a61;
+    --gray-edge: #4a473f;
   }
 
   html[data-theme="light"] {
-    --bg: #eef2f7;
-    --card: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --accent: #0284c7;
-    --green: #16a34a;
-    --red: #dc2626;
-    --amber: #d97706;
-    --border: #e2e8f0;
-    --input-bg: #f1f5f9;
-    --shadow: rgba(15,23,42,0.12);
-    --tab-bg: #f1f5f9;
-    --toggle-grad-1: #ffffff;
-    --toggle-grad-2: #dde3ec;
-    --toggle-shadow-dark: rgba(15,23,42,0.2);
-    --toggle-shadow-light: rgba(255,255,255,0.95);
-    --icon-shadow: rgba(15,23,42,0.25);
-    --card-grad-1: #ffffff;
-    --card-grad-2: #e8edf4;
-    --card-highlight: rgba(255,255,255,0.9);
-    --green-edge: #166534;
-    --red-edge: #991b1b;
-    --accent-edge: #075985;
-    --gray: #64748b;
-    --gray-edge: #47566b;
-    --dial-bg: #fbf6ea;
-    --dial-ink: #1f2937;
-    --hand-color: #1e3a8a;
-    --case-color: #cbd2db;
+    --bg: #f0eee9;
+    --card: #faf8f3;
+    --text: #2b2a28;
+    --muted: #8c877d;
+    --accent: #2f6f6b;
+    --green: #6f8b5e;
+    --red: #b33a3a;
+    --amber: #c98a3e;
+    --border: #dcd7cc;
+    --input-bg: #e8e4dc;
+    --shadow: rgba(60,50,40,0.15);
+    --tab-bg: #e7e2d8;
+    --toggle-grad-1: #faf8f3;
+    --toggle-grad-2: #e2ddd1;
+    --toggle-shadow-dark: rgba(60,50,40,0.22);
+    --toggle-shadow-light: rgba(255,255,255,0.9);
+    --icon-shadow: rgba(60,50,40,0.3);
+    --card-grad-1: #faf8f3;
+    --card-grad-2: #e9e4d9;
+    --card-highlight: rgba(255,255,255,0.85);
+    --green-edge: #566b47;
+    --red-edge: #8a2a2a;
+    --accent-edge: #1f4e4b;
+    --gray: #8c877d;
+    --gray-edge: #6b665d;
   }
 
   * { box-sizing: border-box; }
@@ -100,9 +93,15 @@
 
   .top-bar {
     display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .top-row {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
   }
 
   .tabs {
@@ -138,7 +137,55 @@
   .top-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .volume-slider {
+    width: 56px;
+    height: 16px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .volume-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--tab-bg);
+    box-shadow: inset 2px 2px 4px var(--toggle-shadow-dark), inset -2px -2px 4px var(--toggle-shadow-light);
+  }
+
+  .volume-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--tab-bg);
+    box-shadow: inset 2px 2px 4px var(--toggle-shadow-dark), inset -2px -2px 4px var(--toggle-shadow-light);
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-top: -4.5px;
+    border: none;
+    background: linear-gradient(145deg, var(--toggle-grad-1), var(--toggle-grad-2));
+    box-shadow: 2px 2px 5px var(--toggle-shadow-dark), -2px -2px 5px var(--toggle-shadow-light);
+  }
+
+  .volume-slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, var(--toggle-grad-1), var(--toggle-grad-2));
+    box-shadow: 2px 2px 5px var(--toggle-shadow-dark), -2px -2px 5px var(--toggle-shadow-light);
+  }
+
+  .volume-slider:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
 
   .icon-toggle {
@@ -182,13 +229,6 @@
 
   .mode-switch-wrap {
     display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-
-  .mode-btn {
-    font-size: 12px;
-    padding: 6px 14px;
   }
 
   .view { display: none; }
@@ -198,7 +238,7 @@
     width: 188px;
     height: 188px;
     margin: 0 auto 28px;
-    border-radius: 26px;
+    border-radius: 50%;
     background: var(--input-bg);
     box-shadow: inset 4px 4px 10px var(--toggle-shadow-dark), inset -4px -4px 10px var(--toggle-shadow-light);
     display: flex;
@@ -208,84 +248,49 @@
   }
 
   .analog-clock svg {
-    width: 88%;
-    height: 88%;
+    width: 82%;
+    height: 82%;
     overflow: visible;
   }
 
-  .clock-case { fill: var(--case-color); }
-  .clock-face { fill: var(--dial-bg); }
-
-  .clock-track {
-    fill: none;
-    stroke: var(--dial-ink);
-    stroke-width: 0.4;
-    opacity: 0.35;
-  }
-
   .clock-ticks line {
-    stroke: var(--dial-ink);
-    stroke-width: 0.6;
-    opacity: 0.7;
-  }
-
-  .clock-ticks line.major {
-    stroke-width: 1.3;
-    opacity: 0.9;
-  }
-
-  .clock-numerals text {
-    fill: var(--dial-ink);
-    font-family: 'Times New Roman', Georgia, serif;
-    font-size: 7.5px;
-    font-weight: 600;
-    text-anchor: middle;
-    dominant-baseline: middle;
-  }
-
-  .hand-hour, .hand-minute {
-    fill: var(--hand-color);
-    transform-origin: 50px 50px;
-    transition: transform 0.05s linear;
-  }
-
-  .hand-second-group {
-    transform-origin: 50px 50px;
-    transition: transform 0.05s linear;
-  }
-
-  .hand-second-group line {
-    stroke: var(--red);
-    stroke-width: 0.8;
+    stroke: var(--muted);
+    stroke-width: 1;
     stroke-linecap: round;
   }
 
-  .hand-second-group circle {
-    fill: var(--red);
+  .clock-ticks line.major {
+    stroke: var(--text);
+    stroke-width: 2.2;
   }
 
-  .clock-pin { fill: var(--hand-color); }
+  .hand-hour, .hand-minute {
+    fill: var(--text);
+    transform-origin: 50px 50px;
+    transition: transform 0.05s linear;
+  }
+
+  .hand-second {
+    stroke: var(--accent);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    transform-origin: 50px 50px;
+    transition: transform 0.05s linear;
+  }
+
+  .clock-center { fill: var(--accent); }
 
   #timerPanel.alert .analog-clock {
     box-shadow: inset 4px 4px 10px var(--toggle-shadow-dark), inset -4px -4px 10px var(--toggle-shadow-light), 0 0 0 3px var(--red);
   }
 
-  .display {
-    font-variant-numeric: tabular-nums;
-    font-size: 56px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 32px;
-    line-height: 1;
-    transition: color 0.2s ease;
-  }
+  #timerPanel.alert .hand-second { stroke: var(--red); }
+  #timerPanel.alert .clock-center { fill: var(--red); }
 
-  .display .ms {
-    font-size: 28px;
-    color: var(--muted);
+  #timerPanel.alert .timer-input input,
+  #timerPanel.alert .timer-input .time-circle {
+    color: var(--red);
   }
-
-  .display.alert { color: var(--red); }
 
   .controls {
     display: flex;
@@ -399,7 +404,8 @@
     margin-bottom: 28px;
   }
 
-  .timer-input input {
+  .timer-input input,
+  .timer-input .time-circle {
     width: 64px;
     height: 64px;
     padding: 0;
@@ -415,15 +421,15 @@
     transition: box-shadow 0.15s ease;
   }
 
+  .timer-input .time-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .timer-input input:focus {
     outline: none;
     box-shadow: inset 2px 2px 5px var(--toggle-shadow-dark), inset -2px -2px 5px var(--toggle-shadow-light), 0 0 0 3px var(--accent);
-  }
-
-  .timer-input input::-webkit-inner-spin-button,
-  .timer-input input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
   }
 
   .timer-input span {
@@ -463,54 +469,59 @@
     transform: scale(0.96);
   }
 
-  #timerPanel .display {
-    margin-bottom: 8px;
-  }
 </style>
 </head>
 <body>
 
 <div class="card">
   <div class="top-bar">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="stopwatchPanel">스톱워치</button>
-      <button class="tab-btn" data-tab="timerPanel">타이머</button>
-    </div>
-    <div class="top-actions">
-      <button id="soundToggle" class="icon-toggle" title="완료음 켜기/끄기"><span class="icon">🔔</span></button>
+    <div class="top-row">
       <button id="themeToggle" class="icon-toggle" title="다크/라이트 모드 전환"><span class="icon">🌙</span></button>
+      <div class="top-actions">
+        <button id="soundToggle" class="icon-toggle" title="완료음 켜기/끄기"><span class="icon">🔔</span></button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="70" title="볼륨">
+      </div>
+    </div>
+    <div class="top-row">
+      <div class="tabs panel-tabs">
+        <button class="tab-btn active" data-tab="stopwatchPanel">스톱워치</button>
+        <button class="tab-btn" data-tab="timerPanel">타이머</button>
+      </div>
+      <div class="mode-switch-wrap">
+        <div class="tabs mode-switch">
+          <button class="tab-btn mode-btn active" data-mode="digital">디지털</button>
+          <button class="tab-btn mode-btn" data-mode="analog">아날로그</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="stopwatchPanel" class="panel active">
-    <div class="mode-switch-wrap">
-      <div class="tabs mode-switch">
-        <button class="tab-btn mode-btn active" data-mode="digital">디지털</button>
-        <button class="tab-btn mode-btn" data-mode="analog">아날로그</button>
+    <div class="timer-input">
+      <div>
+        <div class="time-circle" id="swHoursDisplay">00</div>
+        <label>시</label>
       </div>
-    </div>
-
-    <div id="swDigitalView" class="view active">
-      <div class="display">
-        <span id="time">00:00:00</span><span class="ms" id="ms">.00</span>
+      <span>:</span>
+      <div>
+        <div class="time-circle" id="swMinutesDisplay">00</div>
+        <label>분</label>
+      </div>
+      <span>:</span>
+      <div>
+        <div class="time-circle" id="swSecondsDisplay">00</div>
+        <label>초</label>
       </div>
     </div>
 
     <div id="swAnalogView" class="view">
       <div class="analog-clock">
         <svg viewBox="0 0 100 100">
-          <rect class="clock-case" x="3" y="3" width="94" height="94" rx="18"></rect>
-          <rect class="clock-face" x="9" y="9" width="82" height="82" rx="14"></rect>
-          <circle class="clock-track" cx="50" cy="50" r="39"></circle>
           <g class="clock-ticks" id="swTicks"></g>
-          <g class="clock-numerals" id="swNumerals"></g>
-          <polygon id="swHourHand" class="hand-hour" points="48.6,52 51.4,52 50.9,33 50,29 49.1,33"></polygon>
-          <polygon id="swMinuteHand" class="hand-minute" points="48.9,54 51.1,54 50.6,22 50,17 49.4,22"></polygon>
-          <g id="swSecondGroup" class="hand-second-group">
-            <line x1="50" y1="66" x2="50" y2="16"></line>
-            <circle cx="50" cy="60" r="2.5"></circle>
-          </g>
-          <circle class="clock-pin" cx="50" cy="50" r="2.2"></circle>
+          <rect id="swHourHand" class="hand-hour" x="48.5" y="26" width="3" height="24" rx="1.5"></rect>
+          <rect id="swMinuteHand" class="hand-minute" x="49" y="14" width="2" height="36" rx="1"></rect>
+          <line id="swSecondHand" class="hand-second" x1="50" y1="58" x2="50" y2="15"></line>
+          <circle class="clock-center" cx="50" cy="50" r="3"></circle>
         </svg>
       </div>
     </div>
@@ -527,49 +538,29 @@
   <div id="timerPanel" class="panel">
     <div class="timer-input" id="timerInputRow">
       <div>
-        <input type="number" id="hoursInput" min="0" max="99" value="0">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="hoursInput" value="00">
         <label>시</label>
       </div>
       <span>:</span>
       <div>
-        <input type="number" id="minutesInput" min="0" max="59" value="5">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="minutesInput" value="05">
         <label>분</label>
       </div>
       <span>:</span>
       <div>
-        <input type="number" id="secondsInput" min="0" max="59" value="0">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="secondsInput" value="00">
         <label>초</label>
-      </div>
-    </div>
-
-    <div class="mode-switch-wrap">
-      <div class="tabs mode-switch">
-        <button class="tab-btn mode-btn active" data-mode="digital">디지털</button>
-        <button class="tab-btn mode-btn" data-mode="analog">아날로그</button>
-      </div>
-    </div>
-
-    <div id="timerDigitalView" class="view active">
-      <div class="display" id="timerDisplayWrap">
-        <span id="timerTime">00:00:00</span>
       </div>
     </div>
 
     <div id="timerAnalogView" class="view">
       <div class="analog-clock">
         <svg viewBox="0 0 100 100">
-          <rect class="clock-case" x="3" y="3" width="94" height="94" rx="18"></rect>
-          <rect class="clock-face" x="9" y="9" width="82" height="82" rx="14"></rect>
-          <circle class="clock-track" cx="50" cy="50" r="39"></circle>
           <g class="clock-ticks" id="timerTicks"></g>
-          <g class="clock-numerals" id="timerNumerals"></g>
-          <polygon id="timerHourHand" class="hand-hour" points="48.6,52 51.4,52 50.9,33 50,29 49.1,33"></polygon>
-          <polygon id="timerMinuteHand" class="hand-minute" points="48.9,54 51.1,54 50.6,22 50,17 49.4,22"></polygon>
-          <g id="timerSecondGroup" class="hand-second-group">
-            <line x1="50" y1="66" x2="50" y2="16"></line>
-            <circle cx="50" cy="60" r="2.5"></circle>
-          </g>
-          <circle class="clock-pin" cx="50" cy="50" r="2.2"></circle>
+          <rect id="timerHourHand" class="hand-hour" x="48.5" y="26" width="3" height="24" rx="1.5"></rect>
+          <rect id="timerMinuteHand" class="hand-minute" x="49" y="14" width="2" height="36" rx="1"></rect>
+          <line id="timerSecondHand" class="hand-second" x1="50" y1="58" x2="50" y2="15"></line>
+          <circle class="clock-center" cx="50" cy="50" r="3"></circle>
         </svg>
       </div>
     </div>
@@ -610,19 +601,33 @@
     applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
   });
 
-  /* ---------- 소리 알림 토글 ---------- */
+  /* ---------- 소리 알림 켜기/끄기 + 볼륨 ---------- */
   const soundToggle = document.getElementById('soundToggle');
   const soundIcon = soundToggle.querySelector('.icon');
+  const volumeSlider = document.getElementById('volumeSlider');
 
   let soundEnabled = true;
   try { soundEnabled = localStorage.getItem('stopwatch-sound') !== 'off'; } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+
+  let volumeLevel = 70;
+  try {
+    const storedVolume = localStorage.getItem('stopwatch-volume');
+    if (storedVolume !== null) volumeLevel = Math.min(100, Math.max(0, parseInt(storedVolume, 10) || 0));
+  } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+  volumeSlider.value = volumeLevel;
 
   function applySound(enabled) {
     soundEnabled = enabled;
     soundIcon.textContent = enabled ? '🔔' : '🔕';
     soundToggle.classList.toggle('is-off', !enabled);
     soundToggle.title = enabled ? '완료음 끄기' : '완료음 켜기';
+    volumeSlider.disabled = !enabled;
     try { localStorage.setItem('stopwatch-sound', enabled ? 'on' : 'off'); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+  }
+
+  function applyVolume(level) {
+    volumeLevel = level;
+    try { localStorage.setItem('stopwatch-volume', String(level)); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
   }
 
   applySound(soundEnabled);
@@ -631,8 +636,15 @@
     applySound(!soundEnabled);
   });
 
+  volumeSlider.addEventListener('input', () => {
+    const level = parseInt(volumeSlider.value, 10);
+    applyVolume(level);
+    if (level === 0 && soundEnabled) applySound(false);
+    else if (level > 0 && !soundEnabled) applySound(true);
+  });
+
   /* ---------- 탭 전환 ---------- */
-  const tabBtns = document.querySelectorAll('.top-bar .tab-btn');
+  const tabBtns = document.querySelectorAll('.panel-tabs .tab-btn');
   const panels = document.querySelectorAll('.panel');
 
   tabBtns.forEach(btn => {
@@ -653,9 +665,7 @@
   function applyDisplayMode(mode) {
     displayMode = mode;
     modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    document.getElementById('swDigitalView').classList.toggle('active', mode === 'digital');
     document.getElementById('swAnalogView').classList.toggle('active', mode === 'analog');
-    document.getElementById('timerDigitalView').classList.toggle('active', mode === 'digital');
     document.getElementById('timerAnalogView').classList.toggle('active', mode === 'analog');
     try { localStorage.setItem('stopwatch-display-mode', mode); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
   }
@@ -666,20 +676,18 @@
 
   applyDisplayMode(displayMode);
 
-  /* ---------- 아날로그 시계 얼굴(로마 숫자 + 레일웨이 트랙) ---------- */
-  const ROMAN_NUMERALS = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+  /* ---------- 아날로그 시계 얼굴 (심플 모던 디자인) ---------- */
   const SVG_NS = 'http://www.w3.org/2000/svg';
 
-  function buildWatchFace(ticksId, numeralsId) {
+  function buildTicks(ticksId) {
     const ticksG = document.getElementById(ticksId);
-    const numeralsG = document.getElementById(numeralsId);
     if (!ticksG || ticksG.childElementCount) return;
 
-    for (let i = 0; i < 60; i++) {
-      const angle = i * 6 * Math.PI / 180;
-      const isMajor = i % 5 === 0;
-      const outerR = 39;
-      const innerR = isMajor ? 34 : 36.5;
+    for (let i = 0; i < 12; i++) {
+      const angle = i * 30 * Math.PI / 180;
+      const isMajor = i % 3 === 0;
+      const outerR = 44;
+      const innerR = isMajor ? 37 : 40;
       const line = document.createElementNS(SVG_NS, 'line');
       line.setAttribute('x1', (50 + outerR * Math.sin(angle)).toFixed(2));
       line.setAttribute('y1', (50 - outerR * Math.cos(angle)).toFixed(2));
@@ -688,37 +696,27 @@
       if (isMajor) line.classList.add('major');
       ticksG.appendChild(line);
     }
-
-    ROMAN_NUMERALS.forEach((num, i) => {
-      const angle = i * 30 * Math.PI / 180;
-      const r = 26;
-      const text = document.createElementNS(SVG_NS, 'text');
-      text.setAttribute('x', (50 + r * Math.sin(angle)).toFixed(2));
-      text.setAttribute('y', (50 - r * Math.cos(angle)).toFixed(2));
-      text.textContent = num;
-      numeralsG.appendChild(text);
-    });
   }
 
-  buildWatchFace('swTicks', 'swNumerals');
-  buildWatchFace('timerTicks', 'timerNumerals');
+  buildTicks('swTicks');
+  buildTicks('timerTicks');
 
-  function updateWatchHands(hourEl, minuteEl, secondGroupEl, totalMs) {
+  function updateWatchHands(hourEl, minuteEl, secondEl, totalMs) {
     const totalSeconds = Math.max(0, totalMs) / 1000;
     const secondDeg = (totalSeconds % 60) / 60 * 360;
     const minuteDeg = ((totalSeconds / 60) % 60) / 60 * 360;
     const hourDeg = ((totalSeconds / 3600) % 12) / 12 * 360;
     hourEl.style.transform = `rotate(${hourDeg}deg)`;
     minuteEl.style.transform = `rotate(${minuteDeg}deg)`;
-    secondGroupEl.style.transform = `rotate(${secondDeg}deg)`;
+    secondEl.style.transform = `rotate(${secondDeg}deg)`;
   }
 
   const swHourHand = document.getElementById('swHourHand');
   const swMinuteHand = document.getElementById('swMinuteHand');
-  const swSecondGroup = document.getElementById('swSecondGroup');
+  const swSecondHand = document.getElementById('swSecondHand');
   const timerHourHand = document.getElementById('timerHourHand');
   const timerMinuteHand = document.getElementById('timerMinuteHand');
-  const timerSecondGroup = document.getElementById('timerSecondGroup');
+  const timerSecondHand = document.getElementById('timerSecondHand');
 
   /* ---------- 공통 시간 포맷 ---------- */
   function formatTime(ms) {
@@ -741,8 +739,9 @@
   let swRunning = false;
   let laps = [];
 
-  const timeEl = document.getElementById('time');
-  const msEl = document.getElementById('ms');
+  const swHoursDisplay = document.getElementById('swHoursDisplay');
+  const swMinutesDisplay = document.getElementById('swMinutesDisplay');
+  const swSecondsDisplay = document.getElementById('swSecondsDisplay');
   const startStopBtn = document.getElementById('startStopBtn');
   const lapBtn = document.getElementById('lapBtn');
   const resetBtn = document.getElementById('resetBtn');
@@ -750,10 +749,12 @@
 
   function swRender() {
     const now = swRunning ? swElapsed + (performance.now() - swStart) : swElapsed;
-    const { main, ms } = formatTime(now);
-    timeEl.textContent = main;
-    msEl.textContent = ms;
-    updateWatchHands(swHourHand, swMinuteHand, swSecondGroup, now);
+    const { main } = formatTime(now);
+    const [h, m, s] = main.split(':');
+    swHoursDisplay.textContent = h;
+    swMinutesDisplay.textContent = m;
+    swSecondsDisplay.textContent = s;
+    updateWatchHands(swHourHand, swMinuteHand, swSecondHand, now);
   }
 
   function swTick() {
@@ -840,8 +841,6 @@
   const minutesInput = document.getElementById('minutesInput');
   const secondsInput = document.getElementById('secondsInput');
   const timerInputRow = document.getElementById('timerInputRow');
-  const timerTime = document.getElementById('timerTime');
-  const timerDisplayWrap = document.getElementById('timerDisplayWrap');
   const timerStartStopBtn = document.getElementById('timerStartStopBtn');
   const timerResetBtn = document.getElementById('timerResetBtn');
   const presetBtns = document.querySelectorAll('.preset-btn');
@@ -861,9 +860,14 @@
   }
 
   function timerRender() {
-    const { main } = formatTime(timerRemainingMs);
-    timerTime.textContent = main;
-    updateWatchHands(timerHourHand, timerMinuteHand, timerSecondGroup, timerRemainingMs);
+    if (timerRunning || timerFinished) {
+      const { main } = formatTime(timerRemainingMs);
+      const [h, m, s] = main.split(':');
+      hoursInput.value = h;
+      minutesInput.value = m;
+      secondsInput.value = s;
+    }
+    updateWatchHands(timerHourHand, timerMinuteHand, timerSecondHand, timerRemainingMs);
   }
 
   function timerTick() {
@@ -880,12 +884,13 @@
     if (!soundEnabled) return;
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const gainAmount = (volumeLevel / 100) * 0.3;
       [0, 0.35, 0.7].forEach(delay => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = 880;
-        gain.gain.value = 0.2;
+        gain.gain.value = gainAmount;
         osc.connect(gain).connect(ctx.destination);
         osc.start(ctx.currentTime + delay);
         osc.stop(ctx.currentTime + delay + 0.25);
@@ -899,7 +904,6 @@
     cancelAnimationFrame(timerFrame);
     timerRemainingMs = 0;
     timerRender();
-    timerDisplayWrap.classList.add('alert');
     document.getElementById('timerPanel').classList.add('alert');
     timerStartStopBtn.textContent = '시작';
     timerStartStopBtn.classList.remove('running');
@@ -921,7 +925,6 @@
     timerStartStopBtn.classList.add('running');
     timerResetBtn.disabled = false;
     timerInputRow.style.pointerEvents = 'none';
-    timerInputRow.style.opacity = '0.5';
   }
 
   function timerPause() {
@@ -937,8 +940,14 @@
     timerFinished = false;
     cancelAnimationFrame(timerFrame);
     timerRemainingMs = 0;
+    if (timerDurationMs > 0) {
+      const { main } = formatTime(timerDurationMs);
+      const [h, m, s] = main.split(':');
+      hoursInput.value = h;
+      minutesInput.value = m;
+      secondsInput.value = s;
+    }
     timerDurationMs = 0;
-    timerDisplayWrap.classList.remove('alert');
     document.getElementById('timerPanel').classList.remove('alert');
     timerRender();
     timerStartStopBtn.textContent = '시작';
@@ -946,7 +955,6 @@
     timerStartStopBtn.disabled = false;
     timerResetBtn.disabled = true;
     timerInputRow.style.pointerEvents = 'auto';
-    timerInputRow.style.opacity = '1';
   }
 
   timerStartStopBtn.addEventListener('click', () => {
@@ -957,11 +965,12 @@
   presetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       if (timerRunning) return;
-      const secs = parseInt(btn.dataset.secs, 10);
-      hoursInput.value = Math.floor(secs / 3600);
-      minutesInput.value = Math.floor((secs % 3600) / 60);
-      secondsInput.value = secs % 60;
       timerReset();
+      const secs = parseInt(btn.dataset.secs, 10);
+      const pad = (n) => String(n).padStart(2, '0');
+      hoursInput.value = pad(Math.floor(secs / 3600));
+      minutesInput.value = pad(Math.floor((secs % 3600) / 60));
+      secondsInput.value = pad(secs % 60);
     });
   });
 
