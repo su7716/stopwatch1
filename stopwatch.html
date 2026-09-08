@@ -636,19 +636,11 @@
     applySound(!soundEnabled);
   });
 
-  let lastVolumePreview = 0;
-
   volumeSlider.addEventListener('input', () => {
     const level = parseInt(volumeSlider.value, 10);
     applyVolume(level);
     if (level === 0 && soundEnabled) applySound(false);
     else if (level > 0 && !soundEnabled) applySound(true);
-
-    const now = performance.now();
-    if (level > 0 && now - lastVolumePreview > 150) {
-      lastVolumePreview = now;
-      playVolumePreview();
-    }
   });
 
   /* ---------- 탭 전환 ---------- */
@@ -745,6 +737,7 @@
   let swElapsed = 0;
   let swFrame = null;
   let swRunning = false;
+  let swLastTickSecond = 0;
   let laps = [];
 
   const swHoursDisplay = document.getElementById('swHoursDisplay');
@@ -763,6 +756,14 @@
     swMinutesDisplay.textContent = m;
     swSecondsDisplay.textContent = s;
     updateWatchHands(swHourHand, swMinuteHand, swSecondHand, now);
+
+    if (swRunning) {
+      const currentSecond = Math.floor(now / 1000);
+      if (currentSecond !== swLastTickSecond) {
+        swLastTickSecond = currentSecond;
+        playTick();
+      }
+    }
   }
 
   function swTick() {
@@ -773,6 +774,7 @@
   function swStartFn() {
     swRunning = true;
     swStart = performance.now();
+    swLastTickSecond = Math.floor(swElapsed / 1000);
     swFrame = requestAnimationFrame(swTick);
     startStopBtn.textContent = '정지';
     startStopBtn.classList.add('running');
@@ -859,6 +861,7 @@
   let timerFrame = null;
   let timerRunning = false;
   let timerFinished = false;
+  let timerLastTickSecond = 0;
 
   function getInputDurationMs() {
     const h = Math.max(0, parseInt(hoursInput.value, 10) || 0);
@@ -876,6 +879,14 @@
       secondsInput.value = s;
     }
     updateWatchHands(timerHourHand, timerMinuteHand, timerSecondHand, timerRemainingMs);
+
+    if (timerRunning) {
+      const currentSecond = Math.floor(timerRemainingMs / 1000);
+      if (currentSecond !== timerLastTickSecond) {
+        timerLastTickSecond = currentSecond;
+        playTick();
+      }
+    }
   }
 
   function timerTick() {
@@ -917,19 +928,20 @@
     } catch (e) { /* 오디오 사용 불가 시 무시 */ }
   }
 
-  function playVolumePreview() {
+  function playTick() {
     if (!soundEnabled || volumeLevel <= 0) return;
     try {
       const ctx = getAudioContext();
-      const gainAmount = (volumeLevel / 100) * 0.3;
+      const gainAmount = (volumeLevel / 100) * 0.18;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.value = gainAmount;
+      osc.type = 'square';
+      osc.frequency.value = 1200;
+      gain.gain.setValueAtTime(gainAmount, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
       osc.connect(gain).connect(ctx.destination);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(ctx.currentTime + 0.06);
     } catch (e) { /* 오디오 사용 불가 시 무시 */ }
   }
 
@@ -955,6 +967,7 @@
     }
     timerRunning = true;
     timerDeadline = performance.now() + timerRemainingMs;
+    timerLastTickSecond = Math.floor(timerRemainingMs / 1000);
     timerFrame = requestAnimationFrame(timerTick);
     timerStartStopBtn.textContent = '일시정지';
     timerStartStopBtn.classList.add('running');
