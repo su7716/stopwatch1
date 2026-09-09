@@ -1,7 +1,7 @@
 {
-  "name": "스톱워치 & 타이머",
-  "short_name": "스톱워치",
-  "description": "포모도로를 지원하는 스톱워치 & 타이머",
+  "name": "봉타임",
+  "short_name": "봉타임",
+  "description": "포모도로를 지원하는 스톱워치 & 타이머 - 봉타임",
   "start_url": "./stopwatch.html",
   "scope": "./",
   "display": "standalone",
