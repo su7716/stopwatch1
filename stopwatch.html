@@ -102,26 +102,32 @@
 
   .tabs {
     display: flex;
-    gap: 20px;
+    background: var(--tab-bg);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+    box-shadow: inset 3px 3px 6px var(--toggle-shadow-dark), inset -3px -3px 6px var(--toggle-shadow-light);
   }
 
   .tab-btn {
     border: none;
-    border-bottom: 2px solid transparent;
     background: transparent;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 4px 0 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
     cursor: pointer;
     letter-spacing: 0.02em;
     white-space: nowrap;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
   }
 
   .tab-btn.active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 3px 0 var(--accent-edge), 0 4px 10px var(--shadow);
+    transform: translateY(-1px);
   }
 
   .text-toggle {
@@ -232,9 +238,6 @@
 
   .panel { display: none; }
   .panel.active { display: block; }
-
-  .view { display: none; }
-  .view.active { display: block; }
 
   .analog-clock {
     width: 188px;
@@ -514,12 +517,9 @@
 
     .card { padding: 26px 18px 30px; }
 
-    .tabs {
-      gap: 14px;
-    }
-
     .tab-btn {
-      font-size: 13px;
+      padding: 7px 10px;
+      font-size: 12px;
     }
 
     .analog-clock {
@@ -562,12 +562,6 @@
   </div>
 
   <div id="stopwatchPanel" class="panel active">
-    <div class="text-toggle">
-      <button class="text-toggle-btn mode-btn active" data-mode="digital">디지털</button>
-      <span class="dot">·</span>
-      <button class="text-toggle-btn mode-btn" data-mode="analog">아날로그</button>
-    </div>
-
     <div class="timer-input">
       <div>
         <div class="time-circle" id="swHoursDisplay">00</div>
@@ -585,7 +579,7 @@
       </div>
     </div>
 
-    <div id="swAnalogView" class="view">
+    <div id="swAnalogView">
       <div class="analog-clock">
         <svg viewBox="0 0 100 100">
           <g class="clock-ticks" id="swTicks"></g>
@@ -616,12 +610,6 @@
     <div class="pomodoro-status hidden-el" id="pomodoroStatus">
       <span class="phase-label" id="pomodoroPhaseLabel">집중 중</span>
       <span class="pomodoro-dots" id="pomodoroDots"></span>
-    </div>
-
-    <div class="text-toggle">
-      <button class="text-toggle-btn mode-btn active" data-mode="digital">디지털</button>
-      <span class="dot">·</span>
-      <button class="text-toggle-btn mode-btn" data-mode="analog">아날로그</button>
     </div>
 
     <div class="timer-input" id="timerInputRow">
@@ -658,7 +646,7 @@
       </div>
     </div>
 
-    <div id="timerAnalogView" class="view">
+    <div id="timerAnalogView">
       <div class="analog-clock">
         <svg viewBox="0 0 100 100">
           <g class="clock-ticks" id="timerTicks"></g>
@@ -768,26 +756,6 @@
       document.getElementById(btn.dataset.tab).classList.add('active');
     });
   });
-
-  /* ---------- 디지털/아날로그 표시 모드 ---------- */
-  const modeBtns = document.querySelectorAll('.mode-btn');
-
-  let displayMode = 'digital';
-  try { displayMode = localStorage.getItem('stopwatch-display-mode') || 'digital'; } catch (e) { /* 저장소 사용 불가 시 무시 */ }
-
-  function applyDisplayMode(mode) {
-    displayMode = mode;
-    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    document.getElementById('swAnalogView').classList.toggle('active', mode === 'analog');
-    document.getElementById('timerAnalogView').classList.toggle('active', mode === 'analog');
-    try { localStorage.setItem('stopwatch-display-mode', mode); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
-  }
-
-  modeBtns.forEach(btn => {
-    btn.addEventListener('click', () => applyDisplayMode(btn.dataset.mode));
-  });
-
-  applyDisplayMode(displayMode);
 
   /* ---------- 아날로그 시계 얼굴 (심플 모던 디자인) ---------- */
   const SVG_NS = 'http://www.w3.org/2000/svg';
