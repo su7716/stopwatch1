@@ -471,6 +471,50 @@
     transform: scale(0.96);
   }
 
+  .hidden-el { display: none !important; }
+
+  .pomodoro-switch-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .pomodoro-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .pomodoro-status .phase-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .pomodoro-status.phase-focus .phase-label { color: var(--red); }
+  .pomodoro-status.phase-break .phase-label { color: var(--green); }
+
+  .pomodoro-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .pomodoro-dots .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s ease;
+  }
+
+  .pomodoro-dots .dot.done { background: var(--green); }
+  .pomodoro-dots .dot.current { background: var(--accent); }
+
+  #timerSkipBtn { background: var(--accent); --edge: var(--accent-edge); }
+
   @media (max-width: 400px) {
     body { padding: 12px; }
 
@@ -581,6 +625,18 @@
   </div>
 
   <div id="timerPanel" class="panel">
+    <div class="pomodoro-switch-wrap">
+      <div class="tabs">
+        <button class="tab-btn timer-mode-btn active" data-timer-mode="normal">일반</button>
+        <button class="tab-btn timer-mode-btn" data-timer-mode="pomodoro">포모도로</button>
+      </div>
+    </div>
+
+    <div class="pomodoro-status hidden-el" id="pomodoroStatus">
+      <span class="phase-label" id="pomodoroPhaseLabel">집중 중</span>
+      <span class="pomodoro-dots" id="pomodoroDots"></span>
+    </div>
+
     <div class="timer-input" id="timerInputRow">
       <div>
         <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="hoursInput" value="00">
@@ -598,6 +654,23 @@
       </div>
     </div>
 
+    <div class="timer-input hidden-el" id="pomodoroInputRow">
+      <div>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="focusInput" value="25">
+        <label id="focusLabel">집중(분)</label>
+      </div>
+      <span>:</span>
+      <div>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="breakInput" value="05">
+        <label id="breakLabel">휴식(분)</label>
+      </div>
+      <span>:</span>
+      <div>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="setsInput" value="04">
+        <label id="setsLabel">세트</label>
+      </div>
+    </div>
+
     <div id="timerAnalogView" class="view">
       <div class="analog-clock">
         <svg viewBox="0 0 100 100">
@@ -610,15 +683,23 @@
       </div>
     </div>
 
-    <div class="timer-presets">
+    <div class="timer-presets" id="normalPresets">
       <button class="preset-btn" data-secs="60">1분</button>
       <button class="preset-btn" data-secs="180">3분</button>
       <button class="preset-btn" data-secs="300">5분</button>
       <button class="preset-btn" data-secs="600">10분</button>
     </div>
 
+    <div class="timer-presets hidden-el" id="pomodoroPresets">
+      <button class="preset-btn" data-focus="25" data-break="5">25·5</button>
+      <button class="preset-btn" data-focus="50" data-break="10">50·10</button>
+      <button class="preset-btn" data-focus="15" data-break="3">15·3</button>
+      <button class="preset-btn" data-focus="45" data-break="15">45·15</button>
+    </div>
+
     <div class="controls">
       <button id="timerStartStopBtn" class="btn-pop">시작</button>
+      <button id="timerSkipBtn" class="btn-pop hidden-el" disabled>건너뛰기</button>
       <button id="timerResetBtn" class="btn-pop" disabled>초기화</button>
     </div>
   </div>
@@ -898,7 +979,8 @@
   const timerInputRow = document.getElementById('timerInputRow');
   const timerStartStopBtn = document.getElementById('timerStartStopBtn');
   const timerResetBtn = document.getElementById('timerResetBtn');
-  const presetBtns = document.querySelectorAll('.preset-btn');
+  const timerSkipBtn = document.getElementById('timerSkipBtn');
+  const presetBtns = document.querySelectorAll('#normalPresets .preset-btn');
 
   let timerDurationMs = 0;
   let timerRemainingMs = 0;
@@ -907,6 +989,141 @@
   let timerRunning = false;
   let timerFinished = false;
   let timerLastTickSecond = 0;
+
+  /* ---------- 포모도로 서브 모드 ---------- */
+  const timerModeBtns = document.querySelectorAll('.timer-mode-btn');
+  const pomodoroInputRow = document.getElementById('pomodoroInputRow');
+  const pomodoroPresetBtns = document.querySelectorAll('#pomodoroPresets .preset-btn');
+  const focusInput = document.getElementById('focusInput');
+  const breakInput = document.getElementById('breakInput');
+  const setsInput = document.getElementById('setsInput');
+  const focusLabel = document.getElementById('focusLabel');
+  const breakLabel = document.getElementById('breakLabel');
+  const setsLabel = document.getElementById('setsLabel');
+  const pomodoroStatusEl = document.getElementById('pomodoroStatus');
+  const pomodoroPhaseLabel = document.getElementById('pomodoroPhaseLabel');
+  const pomodoroDotsEl = document.getElementById('pomodoroDots');
+
+  let timerMode = 'normal';
+  let pomodoroPhase = 'focus';
+  let pomodoroCurrentSet = 1;
+  let pomodoroTotalSets = 4;
+  let pomodoroFocusMs = 0;
+  let pomodoroBreakMs = 0;
+
+  function setPomodoroLabels(running) {
+    focusLabel.textContent = running ? '분' : '집중(분)';
+    breakLabel.textContent = running ? '초' : '휴식(분)';
+    setsLabel.textContent = running ? '진행' : '세트';
+  }
+
+  function renderPomodoroDots(allDone) {
+    pomodoroDotsEl.innerHTML = '';
+    for (let i = 1; i <= pomodoroTotalSets; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      if (allDone || i < pomodoroCurrentSet) dot.classList.add('done');
+      else if (i === pomodoroCurrentSet) dot.classList.add('current');
+      pomodoroDotsEl.appendChild(dot);
+    }
+  }
+
+  function updatePomodoroStatus() {
+    pomodoroPhaseLabel.textContent = pomodoroPhase === 'focus' ? '집중 중' : '휴식 중';
+    pomodoroStatusEl.classList.toggle('phase-focus', pomodoroPhase === 'focus');
+    pomodoroStatusEl.classList.toggle('phase-break', pomodoroPhase === 'break');
+    renderPomodoroDots();
+  }
+
+  function previewPomodoroStatus() {
+    pomodoroTotalSets = Math.max(1, parseInt(setsInput.value, 10) || 1);
+    pomodoroCurrentSet = 1;
+    pomodoroPhase = 'focus';
+    updatePomodoroStatus();
+  }
+
+  function switchTimerMode(mode) {
+    if (mode === timerMode) return;
+    const hasProgress = timerRunning || timerFinished || timerRemainingMs > 0;
+    if (hasProgress) {
+      const ok = window.confirm('모드를 전환하면 진행 중인 타이머가 초기화됩니다. 계속할까요?');
+      if (!ok) return;
+    }
+    timerMode = mode;
+    timerDurationMs = 0;
+    pomodoroFocusMs = 0;
+    pomodoroBreakMs = 0;
+    timerModeBtns.forEach(b => b.classList.toggle('active', b.dataset.timerMode === mode));
+    timerInputRow.classList.toggle('hidden-el', mode === 'pomodoro');
+    pomodoroInputRow.classList.toggle('hidden-el', mode !== 'pomodoro');
+    document.getElementById('normalPresets').classList.toggle('hidden-el', mode === 'pomodoro');
+    document.getElementById('pomodoroPresets').classList.toggle('hidden-el', mode !== 'pomodoro');
+    pomodoroStatusEl.classList.toggle('hidden-el', mode !== 'pomodoro');
+    timerSkipBtn.classList.toggle('hidden-el', mode !== 'pomodoro');
+    timerReset();
+  }
+
+  timerModeBtns.forEach(btn => {
+    btn.addEventListener('click', () => switchTimerMode(btn.dataset.timerMode));
+  });
+
+  function advancePomodoroPhase() {
+    if (pomodoroPhase === 'focus') {
+      pomodoroPhase = 'break';
+      timerDurationMs = pomodoroBreakMs;
+    } else if (pomodoroCurrentSet < pomodoroTotalSets) {
+      pomodoroCurrentSet += 1;
+      pomodoroPhase = 'focus';
+      timerDurationMs = pomodoroFocusMs;
+    } else {
+      timerFinished = true;
+      pomodoroPhaseLabel.textContent = '포모도로 완료!';
+      pomodoroStatusEl.classList.remove('phase-focus', 'phase-break');
+      renderPomodoroDots(true);
+      timerRender();
+      document.getElementById('timerPanel').classList.add('alert');
+      timerStartStopBtn.textContent = '시작';
+      timerStartStopBtn.classList.remove('running');
+      timerStartStopBtn.disabled = true;
+      timerSkipBtn.disabled = true;
+      return;
+    }
+
+    timerRemainingMs = timerDurationMs;
+    updatePomodoroStatus();
+    timerRunning = true;
+    timerDeadline = performance.now() + timerRemainingMs;
+    timerLastTickSecond = Math.floor(timerRemainingMs / 1000);
+    timerFrame = requestAnimationFrame(timerTick);
+    timerRender();
+  }
+
+  function timerSkip() {
+    if (timerMode !== 'pomodoro' || timerFinished) return;
+    if (!timerRunning && timerRemainingMs <= 0) return;
+    cancelAnimationFrame(timerFrame);
+    timerRunning = false;
+    timerRemainingMs = 0;
+    advancePomodoroPhase();
+  }
+
+  timerSkipBtn.addEventListener('click', timerSkip);
+
+  pomodoroPresetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (timerRunning) return;
+      timerReset();
+      const pad = (n) => String(n).padStart(2, '0');
+      focusInput.value = pad(parseInt(btn.dataset.focus, 10));
+      breakInput.value = pad(parseInt(btn.dataset.break, 10));
+    });
+  });
+
+  [focusInput, breakInput, setsInput].forEach(input => {
+    input.addEventListener('input', () => {
+      if (!timerRunning) timerReset();
+    });
+  });
 
   function getInputDurationMs() {
     const h = Math.max(0, parseInt(hoursInput.value, 10) || 0);
@@ -917,11 +1134,18 @@
 
   function timerRender() {
     if (timerRunning || timerFinished) {
-      const { main } = formatTime(timerRemainingMs);
-      const [h, m, s] = main.split(':');
-      hoursInput.value = h;
-      minutesInput.value = m;
-      secondsInput.value = s;
+      if (timerMode === 'pomodoro') {
+        const totalSec = Math.max(0, Math.floor(timerRemainingMs / 1000));
+        focusInput.value = String(Math.floor(totalSec / 60)).padStart(2, '0');
+        breakInput.value = String(totalSec % 60).padStart(2, '0');
+        setsInput.value = `${pomodoroCurrentSet}/${pomodoroTotalSets}`;
+      } else {
+        const { main } = formatTime(timerRemainingMs);
+        const [h, m, s] = main.split(':');
+        hoursInput.value = h;
+        minutesInput.value = m;
+        secondsInput.value = s;
+      }
     }
     updateWatchHands(timerHourHand, timerMinuteHand, timerSecondHand, timerRemainingMs);
 
@@ -992,23 +1216,42 @@
 
   function timerComplete() {
     timerRunning = false;
-    timerFinished = true;
     cancelAnimationFrame(timerFrame);
     timerRemainingMs = 0;
+    playBeep();
+
+    if (timerMode === 'pomodoro') {
+      advancePomodoroPhase();
+      return;
+    }
+
+    timerFinished = true;
     timerRender();
     document.getElementById('timerPanel').classList.add('alert');
     timerStartStopBtn.textContent = '시작';
     timerStartStopBtn.classList.remove('running');
     timerStartStopBtn.disabled = true;
-    playBeep();
   }
 
   function timerStart() {
     if (timerFinished) return;
     if (!timerRunning && timerRemainingMs <= 0) {
-      timerDurationMs = getInputDurationMs();
-      if (timerDurationMs <= 0) return;
-      timerRemainingMs = timerDurationMs;
+      if (timerMode === 'pomodoro') {
+        pomodoroFocusMs = Math.max(0, parseInt(focusInput.value, 10) || 0) * 60000;
+        pomodoroBreakMs = Math.max(0, parseInt(breakInput.value, 10) || 0) * 60000;
+        pomodoroTotalSets = Math.max(1, parseInt(setsInput.value, 10) || 1);
+        pomodoroCurrentSet = 1;
+        pomodoroPhase = 'focus';
+        timerDurationMs = pomodoroFocusMs;
+        if (timerDurationMs <= 0) return;
+        timerRemainingMs = timerDurationMs;
+        setPomodoroLabels(true);
+        updatePomodoroStatus();
+      } else {
+        timerDurationMs = getInputDurationMs();
+        if (timerDurationMs <= 0) return;
+        timerRemainingMs = timerDurationMs;
+      }
     }
     timerRunning = true;
     timerDeadline = performance.now() + timerRemainingMs;
@@ -1018,6 +1261,8 @@
     timerStartStopBtn.classList.add('running');
     timerResetBtn.disabled = false;
     timerInputRow.style.pointerEvents = 'none';
+    pomodoroInputRow.style.pointerEvents = 'none';
+    if (timerMode === 'pomodoro') timerSkipBtn.disabled = false;
   }
 
   function timerPause() {
@@ -1033,7 +1278,18 @@
     timerFinished = false;
     cancelAnimationFrame(timerFrame);
     timerRemainingMs = 0;
-    if (timerDurationMs > 0) {
+
+    if (timerMode === 'pomodoro') {
+      if (pomodoroFocusMs > 0 || pomodoroBreakMs > 0) {
+        focusInput.value = String(Math.round(pomodoroFocusMs / 60000)).padStart(2, '0');
+        breakInput.value = String(Math.round(pomodoroBreakMs / 60000)).padStart(2, '0');
+        setsInput.value = String(pomodoroTotalSets).padStart(2, '0');
+      }
+      pomodoroFocusMs = 0;
+      pomodoroBreakMs = 0;
+      setPomodoroLabels(false);
+      previewPomodoroStatus();
+    } else if (timerDurationMs > 0) {
       const { main } = formatTime(timerDurationMs);
       const [h, m, s] = main.split(':');
       hoursInput.value = h;
@@ -1047,7 +1303,9 @@
     timerStartStopBtn.classList.remove('running');
     timerStartStopBtn.disabled = false;
     timerResetBtn.disabled = true;
+    timerSkipBtn.disabled = true;
     timerInputRow.style.pointerEvents = 'auto';
+    pomodoroInputRow.style.pointerEvents = 'auto';
   }
 
   timerStartStopBtn.addEventListener('click', () => {
