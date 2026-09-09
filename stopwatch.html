@@ -476,11 +476,6 @@
 
     .card { padding: 26px 18px 30px; }
 
-    .tabs-row {
-      justify-content: center;
-      row-gap: 18px;
-    }
-
     .tab-btn {
       padding: 7px 10px;
       font-size: 12px;
@@ -500,6 +495,23 @@
       width: 56px;
       height: 56px;
       font-size: 19px;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .tabs-row {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .tabs-row .panel-tabs {
+      align-self: flex-start;
+    }
+
+    .tabs-row .mode-switch-wrap {
+      justify-content: flex-end;
     }
   }
 </style>
