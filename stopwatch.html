@@ -102,6 +102,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 10px;
   }
 
   .tabs {
@@ -469,6 +471,36 @@
     transform: scale(0.96);
   }
 
+  @media (max-width: 400px) {
+    body { padding: 12px; }
+
+    .card { padding: 26px 18px 30px; }
+
+    .tabs-row {
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    .analog-clock {
+      width: 160px;
+      height: 160px;
+    }
+
+    .timer-input {
+      gap: 6px;
+    }
+
+    .timer-input input,
+    .timer-input .time-circle {
+      width: 56px;
+      height: 56px;
+      font-size: 19px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -482,7 +514,7 @@
         <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="70" title="볼륨">
       </div>
     </div>
-    <div class="top-row">
+    <div class="top-row tabs-row">
       <div class="tabs panel-tabs">
         <button class="tab-btn active" data-tab="stopwatchPanel">스톱워치</button>
         <button class="tab-btn" data-tab="timerPanel">타이머</button>
