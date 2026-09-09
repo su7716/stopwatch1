@@ -1,0 +1,15 @@
+{
+  "name": "스톱워치 & 타이머",
+  "short_name": "스톱워치",
+  "description": "포모도로를 지원하는 스톱워치 & 타이머",
+  "start_url": "./stopwatch.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1c1b19",
+  "theme_color": "#1c1b19",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

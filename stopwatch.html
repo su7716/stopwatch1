@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>스톱워치 &amp; 타이머</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#1c1b19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="스톱워치">
 <style>
   :root {
     /* 2026 팬톤 올해의 컬러 팔레트: Cloud Dancer(11-4201) + Glamour & Gleam / Comfort Zone 보조 팔레트 */
@@ -1310,6 +1318,12 @@
 
   swRender();
   timerRender();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* 서비스 워커 미지원 시 무시 */ });
+    });
+  }
 </script>
 
 </body>
