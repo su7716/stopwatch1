@@ -1353,14 +1353,70 @@
     { id: 'r4', icon: '🌙', name: '45·15', focus: 45, break: 15, sets: 4, favorite: true }
   ];
 
-  let pomodoroRules = DEFAULT_POMODORO_RULES.slice();
-  try {
-    const storedRules = localStorage.getItem('stopwatch-pomodoro-rules');
-    if (storedRules) pomodoroRules = JSON.parse(storedRules);
-  } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+  /*
+   * 저장 데이터 버전 관리.
+   * 규칙 객체의 "구조"(필드 이름 추가/삭제/변경)를 바꿔야 할 때는:
+   *   1) POMODORO_RULES_VERSION 숫자를 1 올린다.
+   *   2) POMODORO_RULES_MIGRATIONS에 "이전 버전 번호: 변환 함수"를 추가한다.
+   *      예) 버전 1 -> 2로 올릴 때: 1: (rules) => rules.map(r => ({ ...r, color: r.color || '#4fb3ac' }))
+   * 이렇게 해두면 예전 버전 데이터를 가진 사용자도 즐겨찾기/규칙을 잃지 않고
+   * 최신 구조로 자동 변환된 뒤 계속 사용할 수 있다.
+   */
+  const POMODORO_RULES_VERSION = 1;
+
+  const POMODORO_RULES_MIGRATIONS = {
+    // 버전 0: 래핑 없이 배열 그대로 저장하던 초기 형식 -> 버전 1(현재 필드 구성)로 정규화
+    0: (rules) => rules.map((r) => ({
+      id: r.id != null ? r.id : ('r' + Date.now() + Math.random().toString(36).slice(2)),
+      icon: r.icon || '🍅',
+      name: r.name || `${r.focus}-${r.break}`,
+      focus: r.focus,
+      break: r.break,
+      sets: r.sets,
+      favorite: r.favorite !== false
+    }))
+  };
+
+  function loadPomodoroRules() {
+    try {
+      const raw = localStorage.getItem('stopwatch-pomodoro-rules');
+      if (!raw) return DEFAULT_POMODORO_RULES.slice();
+
+      const parsed = JSON.parse(raw);
+      let version;
+      let rules;
+      if (Array.isArray(parsed)) {
+        version = 0;
+        rules = parsed;
+      } else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.rules)) {
+        version = typeof parsed.version === 'number' ? parsed.version : 0;
+        rules = parsed.rules;
+      } else {
+        return DEFAULT_POMODORO_RULES.slice();
+      }
+
+      while (version < POMODORO_RULES_VERSION) {
+        const migrate = POMODORO_RULES_MIGRATIONS[version];
+        if (!migrate) break;
+        rules = migrate(rules);
+        version += 1;
+      }
+
+      return rules;
+    } catch (e) {
+      return DEFAULT_POMODORO_RULES.slice();
+    }
+  }
+
+  let pomodoroRules = loadPomodoroRules();
 
   function saveRules() {
-    try { localStorage.setItem('stopwatch-pomodoro-rules', JSON.stringify(pomodoroRules)); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+    try {
+      localStorage.setItem('stopwatch-pomodoro-rules', JSON.stringify({
+        version: POMODORO_RULES_VERSION,
+        rules: pomodoroRules
+      }));
+    } catch (e) { /* 저장소 사용 불가 시 무시 */ }
   }
 
   const pomodoroPresetsEl = document.getElementById('pomodoroPresets');
