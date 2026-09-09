@@ -521,7 +521,20 @@
 
   #timerSkipBtn { background: var(--accent); --edge: var(--accent-edge); }
 
-  .rule-manage-btn { color: var(--accent); }
+  .rule-manage-btn {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .modal-overlay {
     position: fixed;
@@ -556,6 +569,12 @@
     color: var(--text);
   }
 
+  .modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .modal-close {
     border: none;
     background: none;
@@ -564,6 +583,22 @@
     line-height: 1;
     cursor: pointer;
     padding: 4px;
+  }
+
+  .modal-add-btn {
+    border: none;
+    background: var(--accent);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
   }
 
   .rule-list {
@@ -608,7 +643,7 @@
     color: var(--muted);
   }
 
-  .rule-star, .rule-delete {
+  .rule-star, .rule-edit, .rule-delete {
     border: none;
     background: none;
     font-size: 15px;
@@ -860,13 +895,16 @@
 <div class="modal-overlay hidden-el" id="ruleModalOverlay">
   <div class="modal-card">
     <div class="modal-header">
-      <span>포모도로 규칙</span>
-      <button class="modal-close" id="ruleModalClose" aria-label="닫기">×</button>
+      <span>포모도로 관리</span>
+      <div class="modal-header-actions">
+        <button class="modal-add-btn" id="ruleAddBtn" aria-label="포모도로 추가">+</button>
+        <button class="modal-close" id="ruleModalClose" aria-label="닫기">×</button>
+      </div>
     </div>
 
     <div class="rule-list" id="ruleList"></div>
 
-    <div class="rule-form">
+    <div class="rule-form hidden-el" id="ruleFormWrap">
       <div class="rule-form-row">
         <input type="text" id="ruleIconInput" class="rule-icon-input" maxlength="2" value="🍅" placeholder="🍅">
         <input type="text" id="ruleNameInput" class="rule-name-input" placeholder="규칙 이름" maxlength="12">
@@ -885,7 +923,7 @@
           <label>세트</label>
         </div>
       </div>
-      <button class="btn-pop rule-save-btn" id="ruleSaveBtn">규칙 추가</button>
+      <button class="btn-pop rule-save-btn" id="ruleSaveBtn">포모도로 추가</button>
     </div>
   </div>
 </div>
@@ -1294,11 +1332,50 @@
   const pomodoroPresetsEl = document.getElementById('pomodoroPresets');
   const ruleModalOverlay = document.getElementById('ruleModalOverlay');
   const ruleListEl = document.getElementById('ruleList');
+  const ruleFormWrap = document.getElementById('ruleFormWrap');
+  const ruleAddBtn = document.getElementById('ruleAddBtn');
+  const ruleSaveBtn = document.getElementById('ruleSaveBtn');
   const ruleIconInput = document.getElementById('ruleIconInput');
   const ruleNameInput = document.getElementById('ruleNameInput');
   const ruleFocusInput = document.getElementById('ruleFocusInput');
   const ruleBreakInput = document.getElementById('ruleBreakInput');
   const ruleSetsInput = document.getElementById('ruleSetsInput');
+
+  let editingRuleId = null;
+
+  function resetRuleForm() {
+    editingRuleId = null;
+    ruleIconInput.value = '🍅';
+    ruleNameInput.value = '';
+    ruleFocusInput.value = '25';
+    ruleBreakInput.value = '05';
+    ruleSetsInput.value = '04';
+    ruleSaveBtn.textContent = '포모도로 추가';
+  }
+
+  function openRuleForm(rule) {
+    if (rule) {
+      editingRuleId = rule.id;
+      ruleIconInput.value = rule.icon;
+      ruleNameInput.value = rule.name;
+      ruleFocusInput.value = String(rule.focus).padStart(2, '0');
+      ruleBreakInput.value = String(rule.break).padStart(2, '0');
+      ruleSetsInput.value = String(rule.sets).padStart(2, '0');
+      ruleSaveBtn.textContent = '포모도로 수정';
+    } else {
+      resetRuleForm();
+    }
+    ruleFormWrap.classList.remove('hidden-el');
+  }
+
+  ruleAddBtn.addEventListener('click', () => {
+    const isHidden = ruleFormWrap.classList.contains('hidden-el');
+    if (isHidden || editingRuleId !== null) {
+      openRuleForm(null);
+    } else {
+      ruleFormWrap.classList.add('hidden-el');
+    }
+  });
 
   function applyRule(rule) {
     if (timerRunning) return;
@@ -1321,7 +1398,8 @@
 
     const manageBtn = document.createElement('button');
     manageBtn.className = 'preset-btn rule-manage-btn';
-    manageBtn.textContent = '규칙 관리';
+    manageBtn.textContent = '+';
+    manageBtn.setAttribute('aria-label', '포모도로 관리');
     manageBtn.addEventListener('click', openRuleModal);
     pomodoroPresetsEl.appendChild(manageBtn);
   }
@@ -1345,6 +1423,7 @@
           <span class="rule-detail">집중 ${rule.focus}분 · 휴식 ${rule.break}분 · ${rule.sets}세트</span>
         </span>
         <button class="rule-star${rule.favorite ? ' active' : ''}" title="즐겨찾기">★</button>
+        <button class="rule-edit" title="수정">✎</button>
         <button class="rule-delete" title="삭제">🗑</button>
       `;
       item.querySelector('.rule-star').addEventListener('click', () => {
@@ -1353,9 +1432,16 @@
         renderRuleList();
         renderRuleChips();
       });
+      item.querySelector('.rule-edit').addEventListener('click', () => {
+        openRuleForm(rule);
+      });
       item.querySelector('.rule-delete').addEventListener('click', () => {
         if (!window.confirm(`"${rule.name}" 규칙을 삭제할까요?`)) return;
         pomodoroRules = pomodoroRules.filter(r => r.id !== rule.id);
+        if (editingRuleId === rule.id) {
+          resetRuleForm();
+          ruleFormWrap.classList.add('hidden-el');
+        }
         saveRules();
         renderRuleList();
         renderRuleChips();
@@ -1365,6 +1451,8 @@
   }
 
   function openRuleModal() {
+    resetRuleForm();
+    ruleFormWrap.classList.add('hidden-el');
     renderRuleList();
     ruleModalOverlay.classList.remove('hidden-el');
   }
@@ -1378,7 +1466,7 @@
     if (e.target === ruleModalOverlay) closeRuleModal();
   });
 
-  document.getElementById('ruleSaveBtn').addEventListener('click', () => {
+  ruleSaveBtn.addEventListener('click', () => {
     const icon = ruleIconInput.value.trim() || '🍅';
     const name = ruleNameInput.value.trim();
     const focus = Math.max(0, parseInt(ruleFocusInput.value, 10) || 0);
@@ -1394,17 +1482,30 @@
       return;
     }
 
-    pomodoroRules.push({
-      id: 'r' + Date.now(),
-      icon,
-      name,
-      focus,
-      break: brk,
-      sets,
-      favorite: true
-    });
+    if (editingRuleId) {
+      const rule = pomodoroRules.find(r => r.id === editingRuleId);
+      if (rule) {
+        rule.icon = icon;
+        rule.name = name;
+        rule.focus = focus;
+        rule.break = brk;
+        rule.sets = sets;
+      }
+    } else {
+      pomodoroRules.push({
+        id: 'r' + Date.now(),
+        icon,
+        name,
+        focus,
+        break: brk,
+        sets,
+        favorite: true
+      });
+    }
+
     saveRules();
-    ruleNameInput.value = '';
+    resetRuleForm();
+    ruleFormWrap.classList.add('hidden-el');
     renderRuleList();
     renderRuleChips();
   });
