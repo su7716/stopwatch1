@@ -460,6 +460,7 @@
 
   .timer-presets {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
     margin-bottom: 24px;
@@ -519,6 +520,179 @@
   .pomodoro-dots .dot.current { background: var(--accent); }
 
   #timerSkipBtn { background: var(--accent); --edge: var(--accent-edge); }
+
+  .rule-manage-btn { color: var(--accent); }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+
+  .modal-card {
+    background: linear-gradient(145deg, var(--card-grad-1), var(--card-grad-2));
+    border-radius: 24px;
+    padding: 22px;
+    width: 100%;
+    max-width: 340px;
+    max-height: 82vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px var(--shadow);
+    text-align: left;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .modal-close {
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .rule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 18px;
+  }
+
+  .rule-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--tab-bg);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 3px 3px 6px var(--toggle-shadow-dark), -3px -3px 6px var(--toggle-shadow-light);
+  }
+
+  .rule-icon {
+    font-size: 20px;
+    flex: none;
+  }
+
+  .rule-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .rule-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .rule-detail {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .rule-star, .rule-delete {
+    border: none;
+    background: none;
+    font-size: 15px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    flex: none;
+  }
+
+  .rule-star.active { color: var(--amber); }
+
+  .rule-empty {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    margin: 10px 0;
+  }
+
+  .rule-form {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .rule-form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .rule-icon-input,
+  .rule-name-input,
+  .rule-form-field input {
+    border: none;
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 9px 0;
+    text-align: center;
+    font-family: inherit;
+  }
+
+  .rule-icon-input:focus,
+  .rule-name-input:focus,
+  .rule-form-field input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .rule-icon-input {
+    width: 44px;
+    font-size: 18px;
+    flex: none;
+  }
+
+  .rule-name-input {
+    flex: 1;
+    padding: 9px 10px;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .rule-form-field {
+    flex: 1;
+    text-align: center;
+  }
+
+  .rule-form-field input {
+    width: 100%;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .rule-form-field label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .rule-save-btn {
+    width: 100%;
+    background: var(--accent);
+    --edge: var(--accent-edge);
+  }
 
   @media (max-width: 400px) {
     body { padding: 12px; }
@@ -673,17 +847,45 @@
       <button class="preset-btn" data-secs="600">10분</button>
     </div>
 
-    <div class="timer-presets hidden-el" id="pomodoroPresets">
-      <button class="preset-btn" data-focus="25" data-break="5">25·5</button>
-      <button class="preset-btn" data-focus="50" data-break="10">50·10</button>
-      <button class="preset-btn" data-focus="15" data-break="3">15·3</button>
-      <button class="preset-btn" data-focus="45" data-break="15">45·15</button>
-    </div>
+    <div class="timer-presets hidden-el" id="pomodoroPresets"></div>
 
     <div class="controls">
       <button id="timerStartStopBtn" class="btn-pop">시작</button>
       <button id="timerSkipBtn" class="btn-pop hidden-el" disabled>건너뛰기</button>
       <button id="timerResetBtn" class="btn-pop" disabled>초기화</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden-el" id="ruleModalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>포모도로 규칙</span>
+      <button class="modal-close" id="ruleModalClose" aria-label="닫기">×</button>
+    </div>
+
+    <div class="rule-list" id="ruleList"></div>
+
+    <div class="rule-form">
+      <div class="rule-form-row">
+        <input type="text" id="ruleIconInput" class="rule-icon-input" maxlength="2" value="🍅" placeholder="🍅">
+        <input type="text" id="ruleNameInput" class="rule-name-input" placeholder="규칙 이름" maxlength="12">
+      </div>
+      <div class="rule-form-row">
+        <div class="rule-form-field">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="ruleFocusInput" value="25">
+          <label>집중(분)</label>
+        </div>
+        <div class="rule-form-field">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="ruleBreakInput" value="05">
+          <label>휴식(분)</label>
+        </div>
+        <div class="rule-form-field">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="ruleSetsInput" value="04">
+          <label>세트</label>
+        </div>
+      </div>
+      <button class="btn-pop rule-save-btn" id="ruleSaveBtn">규칙 추가</button>
     </div>
   </div>
 </div>
@@ -956,7 +1158,6 @@
   /* ---------- 포모도로 서브 모드 ---------- */
   const timerModeBtns = document.querySelectorAll('.timer-mode-btn');
   const pomodoroInputRow = document.getElementById('pomodoroInputRow');
-  const pomodoroPresetBtns = document.querySelectorAll('#pomodoroPresets .preset-btn');
   const focusInput = document.getElementById('focusInput');
   const breakInput = document.getElementById('breakInput');
   const setsInput = document.getElementById('setsInput');
@@ -1072,15 +1273,143 @@
 
   timerSkipBtn.addEventListener('click', timerSkip);
 
-  pomodoroPresetBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (timerRunning) return;
-      timerReset();
-      const pad = (n) => String(n).padStart(2, '0');
-      focusInput.value = pad(parseInt(btn.dataset.focus, 10));
-      breakInput.value = pad(parseInt(btn.dataset.break, 10));
+  /* ---------- 포모도로 규칙(즐겨찾기 프리셋) ---------- */
+  const DEFAULT_POMODORO_RULES = [
+    { id: 'r1', icon: '🎯', name: '25·5', focus: 25, break: 5, sets: 4, favorite: true },
+    { id: 'r2', icon: '🚀', name: '50·10', focus: 50, break: 10, sets: 4, favorite: true },
+    { id: 'r3', icon: '⚡', name: '15·3', focus: 15, break: 3, sets: 4, favorite: true },
+    { id: 'r4', icon: '🌙', name: '45·15', focus: 45, break: 15, sets: 4, favorite: true }
+  ];
+
+  let pomodoroRules = DEFAULT_POMODORO_RULES.slice();
+  try {
+    const storedRules = localStorage.getItem('stopwatch-pomodoro-rules');
+    if (storedRules) pomodoroRules = JSON.parse(storedRules);
+  } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+
+  function saveRules() {
+    try { localStorage.setItem('stopwatch-pomodoro-rules', JSON.stringify(pomodoroRules)); } catch (e) { /* 저장소 사용 불가 시 무시 */ }
+  }
+
+  const pomodoroPresetsEl = document.getElementById('pomodoroPresets');
+  const ruleModalOverlay = document.getElementById('ruleModalOverlay');
+  const ruleListEl = document.getElementById('ruleList');
+  const ruleIconInput = document.getElementById('ruleIconInput');
+  const ruleNameInput = document.getElementById('ruleNameInput');
+  const ruleFocusInput = document.getElementById('ruleFocusInput');
+  const ruleBreakInput = document.getElementById('ruleBreakInput');
+  const ruleSetsInput = document.getElementById('ruleSetsInput');
+
+  function applyRule(rule) {
+    if (timerRunning) return;
+    timerReset();
+    const pad = (n) => String(n).padStart(2, '0');
+    focusInput.value = pad(rule.focus);
+    breakInput.value = pad(rule.break);
+    setsInput.value = pad(rule.sets);
+  }
+
+  function renderRuleChips() {
+    pomodoroPresetsEl.innerHTML = '';
+    pomodoroRules.filter(r => r.favorite).forEach(rule => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn rule-chip';
+      btn.textContent = `${rule.icon} ${rule.name}`;
+      btn.addEventListener('click', () => applyRule(rule));
+      pomodoroPresetsEl.appendChild(btn);
     });
+
+    const manageBtn = document.createElement('button');
+    manageBtn.className = 'preset-btn rule-manage-btn';
+    manageBtn.textContent = '규칙 관리';
+    manageBtn.addEventListener('click', openRuleModal);
+    pomodoroPresetsEl.appendChild(manageBtn);
+  }
+
+  function renderRuleList() {
+    ruleListEl.innerHTML = '';
+    if (pomodoroRules.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'rule-empty';
+      empty.textContent = '저장된 규칙이 없습니다.';
+      ruleListEl.appendChild(empty);
+      return;
+    }
+    pomodoroRules.forEach(rule => {
+      const item = document.createElement('div');
+      item.className = 'rule-item';
+      item.innerHTML = `
+        <span class="rule-icon">${rule.icon}</span>
+        <span class="rule-info">
+          <span class="rule-name">${rule.name}</span>
+          <span class="rule-detail">집중 ${rule.focus}분 · 휴식 ${rule.break}분 · ${rule.sets}세트</span>
+        </span>
+        <button class="rule-star${rule.favorite ? ' active' : ''}" title="즐겨찾기">★</button>
+        <button class="rule-delete" title="삭제">🗑</button>
+      `;
+      item.querySelector('.rule-star').addEventListener('click', () => {
+        rule.favorite = !rule.favorite;
+        saveRules();
+        renderRuleList();
+        renderRuleChips();
+      });
+      item.querySelector('.rule-delete').addEventListener('click', () => {
+        if (!window.confirm(`"${rule.name}" 규칙을 삭제할까요?`)) return;
+        pomodoroRules = pomodoroRules.filter(r => r.id !== rule.id);
+        saveRules();
+        renderRuleList();
+        renderRuleChips();
+      });
+      ruleListEl.appendChild(item);
+    });
+  }
+
+  function openRuleModal() {
+    renderRuleList();
+    ruleModalOverlay.classList.remove('hidden-el');
+  }
+
+  function closeRuleModal() {
+    ruleModalOverlay.classList.add('hidden-el');
+  }
+
+  document.getElementById('ruleModalClose').addEventListener('click', closeRuleModal);
+  ruleModalOverlay.addEventListener('click', (e) => {
+    if (e.target === ruleModalOverlay) closeRuleModal();
   });
+
+  document.getElementById('ruleSaveBtn').addEventListener('click', () => {
+    const icon = ruleIconInput.value.trim() || '🍅';
+    const name = ruleNameInput.value.trim();
+    const focus = Math.max(0, parseInt(ruleFocusInput.value, 10) || 0);
+    const brk = Math.max(0, parseInt(ruleBreakInput.value, 10) || 0);
+    const sets = Math.max(1, parseInt(ruleSetsInput.value, 10) || 1);
+
+    if (!name) {
+      ruleNameInput.focus();
+      return;
+    }
+    if (focus <= 0) {
+      ruleFocusInput.focus();
+      return;
+    }
+
+    pomodoroRules.push({
+      id: 'r' + Date.now(),
+      icon,
+      name,
+      focus,
+      break: brk,
+      sets,
+      favorite: true
+    });
+    saveRules();
+    ruleNameInput.value = '';
+    renderRuleList();
+    renderRuleChips();
+  });
+
+  renderRuleChips();
 
   [focusInput, breakInput, setsInput].forEach(input => {
     input.addEventListener('input', () => {
